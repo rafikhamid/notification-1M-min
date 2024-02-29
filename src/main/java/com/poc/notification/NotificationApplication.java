@@ -20,8 +20,13 @@ public class NotificationApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		// process 3700 in 1 minute
-		notificationService.process();
+		// PART 1 : process 3700 in 1 minute
+		// notificationService.process();
+
+		// PART 2 : Multithreading V1 - using SafeCounter
+		// Thread = 8 -> process ~30 k in 1 minute
+		// Thread = 16 -> process 43~50 k in 1 minute
+		notificationService.processMultiThread(16);
 	}
 
 }
