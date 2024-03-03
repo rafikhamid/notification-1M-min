@@ -8,12 +8,13 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class NotificationService {
@@ -47,7 +48,7 @@ public class NotificationService {
         SafeCounter counter = new SafeCounter();
 
         Instant start = Instant.now();
-        List<Notification> all = notificationRepository.findAll();
+        List<Notification> all = notificationRepository.findBySentDateNull();
         System.out.println("#### Start processing : " + all.size() + " notifications");
 
         List<List<Notification>> partitions = Lists.partition(all, all.size() / nbThreads);
@@ -71,5 +72,6 @@ public class NotificationService {
 
         System.out.println(" TOTAL PROCESSED : " + counter.getCount());
     }
+
 
 }

@@ -27,6 +27,7 @@ public class NotificationApplication implements CommandLineRunner {
 		// Thread = 8 -> process ~30 k in 1 minute
 		// Thread = 16 -> process 43~50 k in 1 minute
 		notificationService.processMultiThread(16);
+		
 	}
 
 }
