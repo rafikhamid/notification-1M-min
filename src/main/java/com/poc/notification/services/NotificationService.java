@@ -51,7 +51,7 @@ public class NotificationService {
         List<Notification> all = notificationRepository.findBySentDateNull();
         System.out.println("#### Start processing : " + all.size() + " notifications");
 
-        List<List<Notification>> partitions = Lists.partition(all, all.size() / nbThreads);
+        List<List<Notification>> partitions = Lists.partition(all, 500);
         for (List<Notification> part : partitions){
             executor.submit(new NotificationThread(part, this, counter));
         }
