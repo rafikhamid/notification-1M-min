@@ -4,11 +4,9 @@ import com.poc.notification.services.NotificationService;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.connection.RabbitConnectionFactoryBean;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -39,7 +37,8 @@ public class NotificationApplication implements CommandLineRunner {
 		// Thread = 8 -> process ~30 k in 1 minute
 		// Thread = 16 -> process 43~50 k in 1 minute
 		//notificationService.processMultiThread(16);
-		
+
+		// PART 3 : using RabbitMQ (see NotificationController) : processed 381368 in 1 minute
 	}
 
 	@Bean
@@ -50,7 +49,10 @@ public class NotificationApplication implements CommandLineRunner {
 	@Bean
 	public SimpleMessageConverter converter(){
 		SimpleMessageConverter converter = new SimpleMessageConverter();
-		converter.setAllowedListPatterns(List.of("com.poc.notification.entity.*", "java.util.*", "java.sql.Timestamp"));
+		converter.setAllowedListPatterns(List.of("com.poc.notification.entity.*",
+				"java.util.*",
+				"java.sql.Timestamp",
+				"java.lang.Boolean"));
 		return converter;
 	}
 
@@ -72,4 +74,5 @@ public class NotificationApplication implements CommandLineRunner {
 		factory.setMessageConverter(converter());
 		return factory;
 	}
+
 }

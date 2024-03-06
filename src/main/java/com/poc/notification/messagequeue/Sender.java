@@ -2,19 +2,18 @@ package com.poc.notification.messagequeue;
 
 import com.poc.notification.entity.Notification;
 import com.poc.notification.repositories.NotificationRepository;
+import com.poc.notification.services.SafeCounter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
-
 public class Sender {
 
     @Autowired
@@ -22,16 +21,23 @@ public class Sender {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    public void send(){
-        int count = 0;
-        Instant start = Instant.now();
-        List<Notification> all = notificationRepository.findAll();
-        log.info("#### Start processing : " + all.size() + " notifications");
-        Iterator<Notification> iterator = all.iterator();
+    @Async
+    public CompletableFuture<Long> send(List<Notification> notifications, SafeCounter safeCounter){
+        log.info("#### Start sending : " + notifications.size() + " notifications to message queue");
+
+        notifications.parallelStream().forEach( notif -> {
+            rabbitTemplate.convertAndSend("", "notifications", notif);
+            safeCounter.increment(1);
+        });
+
+        /*
+        Iterator<Notification> iterator = notifications.iterator();
         do {
             rabbitTemplate.convertAndSend("", "notifications", iterator.next());
-            count++;
-        } while (iterator.hasNext() && Duration.between(start, Instant.now()).getSeconds() <= 60) ;
-        log.info("#### End processing notifications : " + count);
+            safeCounter.increment(1);
+        } while (iterator.hasNext());
+        */
+        log.info("#### End sending notifications to message queue : " + safeCounter.getCount());
+        return CompletableFuture.completedFuture(safeCounter.getCount());
     }
 }

@@ -3,6 +3,7 @@ package com.poc.notification.services;
 import com.google.common.collect.Lists;
 import com.poc.notification.entity.Notification;
 import com.poc.notification.repositories.NotificationRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +16,19 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 public class NotificationService {
 
     @Autowired
     private NotificationRepository notificationRepository;
     @Autowired
     private EmailService emailService;
+
+    public List<Notification> findAllUnsentNotifications(){
+        List<Notification> all = notificationRepository.findAll();
+        log.info("#### Found " + all.size() + " unsent notifications");
+        return all;
+    }
 
     public void process(){
         int count = 0;
