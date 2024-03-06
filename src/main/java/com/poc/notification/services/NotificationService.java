@@ -8,13 +8,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class NotificationService {
@@ -27,7 +25,7 @@ public class NotificationService {
     public void process(){
         int count = 0;
         Instant start = Instant.now();
-        List<Notification> all = notificationRepository.findBySentDateNull();
+        List<Notification> all = notificationRepository.findBySentNull();
         System.out.println("#### Start processing : " + all.size() + " notifications");
         Iterator<Notification> iterator = all.iterator();
         do {
@@ -39,7 +37,7 @@ public class NotificationService {
 
     void send(Notification notification){
         emailService.send(notification);
-        notification.setSentDate(Calendar.getInstance().getTime());
+        notification.setSent(true);
         notificationRepository.save(notification);
     }
 
@@ -48,7 +46,7 @@ public class NotificationService {
         SafeCounter counter = new SafeCounter();
 
         Instant start = Instant.now();
-        List<Notification> all = notificationRepository.findBySentDateNull();
+        List<Notification> all = notificationRepository.findBySentNull();
         System.out.println("#### Start processing : " + all.size() + " notifications");
 
         List<List<Notification>> partitions = Lists.partition(all, 500);
@@ -72,6 +70,5 @@ public class NotificationService {
 
         System.out.println(" TOTAL PROCESSED : " + counter.getCount());
     }
-
 
 }

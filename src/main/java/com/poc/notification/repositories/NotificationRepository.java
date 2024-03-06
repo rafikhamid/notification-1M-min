@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findBySentDateNull();
+    //List<Notification> findBySentDateNull();
+
+    List<Notification> findBySentNull();
 
 }
