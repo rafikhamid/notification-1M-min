@@ -42,8 +42,23 @@ public class NotificationApplication implements CommandLineRunner {
 	}
 
 	@Bean
-	public Queue queue() {
-		return new Queue("notifications");
+	public Queue queue1() {
+		return new Queue("notifications-1");
+	}
+
+	@Bean
+	public Queue queue2() {
+		return new Queue("notifications-2");
+	}
+
+	@Bean
+	public Queue queue3() {
+		return new Queue("notifications-3");
+	}
+
+	@Bean
+	public Queue queue4() {
+		return new Queue("notifications-4");
 	}
 
 	@Bean
@@ -70,7 +85,7 @@ public class NotificationApplication implements CommandLineRunner {
 	public RabbitListenerContainerFactory<SimpleMessageListenerContainer> prefetchTenRabbitListenerContainerFactory(ConnectionFactory rabbitConnectionFactory) {
 		SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
 		factory.setConnectionFactory(rabbitConnectionFactory);
-		factory.setPrefetchCount(100);
+		factory.setPrefetchCount(500);
 		factory.setMessageConverter(converter());
 		return factory;
 	}

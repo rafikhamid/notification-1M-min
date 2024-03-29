@@ -5,6 +5,7 @@ import com.poc.notification.entity.Notification;
 import com.poc.notification.repositories.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -25,9 +26,14 @@ public class NotificationService {
     private EmailService emailService;
 
     public List<Notification> findAllUnsentNotifications(){
-        List<Notification> all = notificationRepository.findAll();
+        List<Notification> all = notificationRepository.findAll(); //notificationRepository.findBySentNull
         log.info("#### Found " + all.size() + " unsent notifications");
         return all;
+    }
+
+    @Async
+    public void save(Notification notification) {
+        notificationRepository.save(notification);
     }
 
     public void process(){
@@ -79,4 +85,7 @@ public class NotificationService {
         System.out.println(" TOTAL PROCESSED : " + counter.getCount());
     }
 
+    public void saveAll(List<Notification> notifications) {
+        notificationRepository.saveAll(notifications);
+    }
 }

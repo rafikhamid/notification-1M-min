@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -36,7 +37,11 @@ public class NotificationController {
 
     @GetMapping("/startProducerAndConsumer")
     public String startProducerAndConsumer() {
-        this.startConsumer();
+        //this.startConsumer();
+        rabbitListenerEndpointRegistry.getListenerContainer("Notification-Single-Consumer-1").start();
+        rabbitListenerEndpointRegistry.getListenerContainer("Notification-Single-Consumer-2").start();
+        rabbitListenerEndpointRegistry.getListenerContainer("Notification-Single-Consumer-3").start();
+        rabbitListenerEndpointRegistry.getListenerContainer("Notification-Single-Consumer-4").start();
 
         List<Notification> allUnsentNotifications = notificationService.findAllUnsentNotifications();
         if (allUnsentNotifications.isEmpty()) {
@@ -46,19 +51,24 @@ public class NotificationController {
         CompletableFuture<Long> future = sender.send(allUnsentNotifications, safeCounter);
         try {
             Long count = future.get(1, TimeUnit.MINUTES);
-            return "Found : " + allUnsentNotifications.size() + " unsent notifications. Processed : " + count;
+            return "Found : " + allUnsentNotifications.size() + " unsent notifications. Sent : " + count;
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         } catch (TimeoutException e) {
             log.error("TimeoutException in waiting for Producer.", e.getMessage());
         } finally {
-            rabbitListenerEndpointRegistry.getListenerContainer("Notification-Consumer").stop();
-            return "Found : " + allUnsentNotifications.size() + " unsent notifications. Processed : " + safeCounter.getCount();
+            String ret = "Found : " + allUnsentNotifications.size() + " unsent notifications. Sent : " + safeCounter.getCount();
+            rabbitListenerEndpointRegistry.getListenerContainer("Notification-Single-Consumer-1").stop();
+            rabbitListenerEndpointRegistry.getListenerContainer("Notification-Single-Consumer-2").stop();
+            rabbitListenerEndpointRegistry.getListenerContainer("Notification-Single-Consumer-3").stop();
+            rabbitListenerEndpointRegistry.getListenerContainer("Notification-Single-Consumer-4").stop();
+            return ret;
         }
     }
 
     @GetMapping("/startProducer")
     public String startProducer() {
+        Instant now = Instant.now();
         List<Notification> allUnsentNotifications = notificationService.findAllUnsentNotifications();
         if (allUnsentNotifications.isEmpty()) {
             return "No unsent notifications found.";
@@ -67,7 +77,8 @@ public class NotificationController {
         CompletableFuture<Long> future = sender.send(allUnsentNotifications, safeCounter);
         try {
             Long count = future.get(1, TimeUnit.MINUTES);
-            return "Found : " + allUnsentNotifications.size() + " unsent notifications. Processed : " + count;
+            long seconds = Duration.between(now, Instant.now()).getSeconds();
+            return "Found : " + allUnsentNotifications.size() + " unsent notifications. Processed : " + count + " --> took " + seconds + " s";
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         } catch (TimeoutException e) {
@@ -77,7 +88,18 @@ public class NotificationController {
 
     @GetMapping("/startConsumer")
     public String startConsumer() {
-        rabbitListenerEndpointRegistry.getListenerContainer("Notification-Consumer").start();
-        return "Started Notification consumers";
+        Instant now = Instant.now();
+        System.out.println("Started Notification consumers");
+        rabbitListenerEndpointRegistry.start();
+        try {
+            Thread.sleep(50000);
+            long seconds = Duration.between(now, Instant.now()).getSeconds();
+            long count = receiver.safeCounter.getCount();
+            System.out.println("########### Consumed : " + count + " -> took " + seconds + " s.");
+            rabbitListenerEndpointRegistry.stop();
+            return "Finished consumers";
+        } catch (InterruptedException  e) {
+            return "TimeoutException.";
+        }
     }
 }
