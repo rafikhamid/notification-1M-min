@@ -6,10 +6,7 @@ import com.poc.notification.messagequeue.Sender;
 import com.poc.notification.services.NotificationService;
 import com.poc.notification.services.SafeCounter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.listener.RabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.listener.RabbitListenerEndpointRegistry;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +31,14 @@ public class NotificationController {
     private Sender sender;
     @Autowired
     private Receiver receiver;
+
+    @GetMapping("/startProducerBatch")
+    public void startProducerBatch() {
+        // Batch of 50000 sent 1M to queue in 43 s
+        sender.producerBatchInsert();
+    }
+
+
 
     @GetMapping("/startProducerAndConsumer")
     public String startProducerAndConsumer() {

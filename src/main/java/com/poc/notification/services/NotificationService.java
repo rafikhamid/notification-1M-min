@@ -5,6 +5,8 @@ import com.poc.notification.entity.Notification;
 import com.poc.notification.repositories.NotificationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Service
 @Slf4j
@@ -39,7 +39,7 @@ public class NotificationService {
     public void process(){
         int count = 0;
         Instant start = Instant.now();
-        List<Notification> all = notificationRepository.findBySentNull();
+        List<Notification> all = notificationRepository.findAll();
         System.out.println("#### Start processing : " + all.size() + " notifications");
         Iterator<Notification> iterator = all.iterator();
         do {
@@ -60,7 +60,7 @@ public class NotificationService {
         SafeCounter counter = new SafeCounter();
 
         Instant start = Instant.now();
-        List<Notification> all = notificationRepository.findBySentNull();
+        List<Notification> all = notificationRepository.findAll();
         System.out.println("#### Start processing : " + all.size() + " notifications");
 
         List<List<Notification>> partitions = Lists.partition(all, 500);
@@ -88,4 +88,5 @@ public class NotificationService {
     public void saveAll(List<Notification> notifications) {
         notificationRepository.saveAll(notifications);
     }
+
 }

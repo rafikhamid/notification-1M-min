@@ -75,7 +75,6 @@ public class Receiver {
         //safeCounter.increment(notifications.size());
     }
 
-    /*
     @RabbitListener(id = "Notification-Group-Consumer",
             autoStartup = "false",
             queues = {"notifications"},
@@ -94,8 +93,10 @@ public class Receiver {
             event.setSent(Boolean.TRUE);
             notificationService.save(event);
         });
+
+         */
         //safeCounter.increment(notifications.size());
     }
-    */
+
 
 }

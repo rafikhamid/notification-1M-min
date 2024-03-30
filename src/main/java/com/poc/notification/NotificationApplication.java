@@ -35,8 +35,8 @@ public class NotificationApplication implements CommandLineRunner {
 
 		// PART 2 : Multithreading V1 - using SafeCounter
 		// Thread = 8 -> process ~30 k in 1 minute
-		// Thread = 16 -> process 43~50 k in 1 minute
-		//notificationService.processMultiThread(16);
+		// Thread = 16 -> process ~56 k in 1 minute
+		// notificationService.processMultiThread(16);
 
 		// PART 3 : using RabbitMQ (see NotificationController) : processed 381368 in 1 minute
 	}
